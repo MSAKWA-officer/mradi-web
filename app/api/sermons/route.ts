@@ -1,60 +1,51 @@
-import { supabase } from "@/app/lib/supabaseClient";
 import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/app/lib/supabaseClient";
 
-// 📥 GET ALL SERMONS
-export async function GET() {
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await context.params;
+
+    const body = await req.json();
+    const { title, preacher, videoUrl } = body;
+
     const { data, error } = await supabase
       .from("sermons")
-      .select("*")
-      .order("created_at", { ascending: false }); // Inapanga kuanzia ya hivi karibuni
+      .update({ title, preacher, videoUrl })
+      .eq("id", id)
+      .select()
+      .single();
 
     if (error) {
-      console.error("GET ERROR:", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data || []);
-  } catch (err) {
-    console.error("SERVER ERROR:", err);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(data);
+  } catch {
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
 
-// ➕ CREATE SERMON
-export async function POST(req: NextRequest) {
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const body = await req.json();
-    const { title, preacher, videourl } = body;
+    const { id } = await context.params;
 
-    // 🔍 Validazione rahisi
-    if (!title || !preacher || !videourl) {
-      return NextResponse.json(
-        { error: "Kumbuka kujaza Title, Preacher, na Video URL" },
-        { status: 400 }
-      );
-    }
-
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("sermons")
-      .insert([
-        {
-          title,
-          preacher,
-          videourl,
-        },
-      ])
-      .select()
-      .single(); // Inarudisha kitu kimoja tu badala ya array
+      .delete()
+      .eq("id", id);
 
     if (error) {
-      console.error("POST ERROR:", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data, { status: 201 });
-  } catch (err) {
-    console.error("SERVER ERROR:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ message: "Deleted" });
+  } catch {
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
