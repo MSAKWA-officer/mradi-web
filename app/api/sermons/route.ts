@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabaseClient";
-
+//This is for get and post only
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
