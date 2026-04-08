@@ -1,78 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabaseClient";
 
-// ✏️ UPDATE SERMON
+// ✏️ UPDATE SERMON (PUT)
 export async function PUT(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> } // 👈 muhimu sana
+  { params }: { params: Promise<{ id: string }> } // ✅ LAZIMA iwe Promise
 ) {
   try {
-    const { id } = await context.params; // 👈 lazima await
-
+    // 1. Subiri params zipatikane (await)
+    const { id } = await params;
+    
     const body = await req.json();
-    const { title, preacher, videoUrl } = body;
+    const { title, preacher, videourl } = body;
 
-    if (!title || !preacher || !videoUrl) {
+    // 🔍 Validation
+    if (!title || !preacher || !videourl) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: "Sehemu zote (title, preacher, videourl) zinahitajika" },
         { status: 400 }
       );
     }
 
     const { data, error } = await supabase
       .from("sermons")
-      .update({
-        title,
-        preacher,
-        videoUrl,
-      })
-      .eq("id", id)
+      .update({ title, preacher, videourl })
+      .eq("id", id) // ✅ Tunatumia id tuliyo-await
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: "Sermon haijapatikana" }, { status: 404 });
     }
 
     return NextResponse.json(data);
   } catch (err) {
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }
 
 // 🗑 DELETE SERMON
 export async function DELETE(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> } // 👈 muhimu
+  { params }: { params: Promise<{ id: string }> } // ✅ LAZIMA iwe Promise
 ) {
   try {
-    const { id } = await context.params;
+    // 1. Subiri params zipatikane (await)
+    const { id } = await params;
 
     const { error } = await supabase
       .from("sermons")
       .delete()
-      .eq("id", id);
+      .eq("id", id); // ✅ Tunatumia id tuliyo-await
 
     if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({
-      message: "Deleted successfully",
-    });
+    return NextResponse.json({ message: "Sermon imefutwa kikamilifu" });
   } catch (err) {
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }
