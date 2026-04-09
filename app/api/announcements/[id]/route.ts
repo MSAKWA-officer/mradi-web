@@ -1,3 +1,4 @@
+// app/api/announcements/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabaseClient";
 
@@ -35,6 +36,7 @@ export async function PUT(
 
     return NextResponse.json(data?.[0] ?? {});
   } catch (err) {
+    console.error("PUT CATCH ERROR:", err);
     return NextResponse.json(
       { error: "Failed to update" },
       { status: 500 }
@@ -42,12 +44,13 @@ export async function PUT(
   }
 }
 
+// ✏️ DELETE ANNOUNCEMENT
 export async function DELETE(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params; // ✅ muhimu sana
+    const { id } = await context.params; // ✅ fix
 
     const { error } = await supabase
       .from("announcements")
@@ -56,7 +59,6 @@ export async function DELETE(
 
     if (error) {
       console.error("DELETE ERROR:", error);
-
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
@@ -66,11 +68,9 @@ export async function DELETE(
     return NextResponse.json({ message: "Deleted successfully" });
   } catch (err) {
     console.error("DELETE CATCH ERROR:", err);
-
     return NextResponse.json(
       { error: "Failed to delete" },
       { status: 500 }
     );
   }
-
 }
