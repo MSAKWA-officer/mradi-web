@@ -16,11 +16,9 @@ export default function SermonsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // 🔐 ROLE
   const [role, setRole] = useState<string | null>(null);
   const isAdmin = role === "admin";
 
-  // ➕ FORM STATE
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState<Sermon | null>(null);
 
@@ -28,18 +26,38 @@ export default function SermonsPage() {
   const [preacher, setPreacher] = useState("");
   const [videourl, setVideourl] = useState("");
 
-  // 📥 INIT
-  useEffect(() => {
-    fetchData();
-    getUserRole();
-  }, []);
+  // ✅ Convert YouTube URL → Embed URL
+  const getEmbedUrl = (url: string) => {
+    try {
+      if (url.includes("embed")) return url;
 
-  // 📥 FETCH
+      const videoId =
+        url.includes("youtu.be/")
+          ? url.split("youtu.be/")[1]?.split("?")[0]
+          : url.split("v=")[1]?.split("&")[0];
+
+      return `https://www.youtube.com/embed/${videoId}`;
+    } catch {
+      return "";
+    }
+  };
+
+  // 📥 FETCH (FIXED 🔥)
   const fetchData = async () => {
-    const res = await fetch("/api/sermons");
-    const data = await res.json();
-    setSermons(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/sermons");
+      const data = await res.json();
+
+      console.log("FETCHED:", data);
+
+      // ✅ muhimu sana (fix ya error yako)
+      setSermons(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("FETCH ERROR:", error);
+      setSermons([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 🔐 GET ROLE
@@ -59,11 +77,20 @@ export default function SermonsPage() {
     setRole(data?.role);
   };
 
-  // 🔍 FILTER
-  const filteredSermons = sermons.filter((s) =>
-    s.title.toLowerCase().includes(search.toLowerCase()) ||
-    s.preacher.toLowerCase().includes(search.toLowerCase())
-  );
+  // 📥 INIT
+  useEffect(() => {
+    fetchData();
+    getUserRole();
+  }, []);
+
+  // 🔍 FILTER (SAFE 🔥)
+  const filteredSermons = Array.isArray(sermons)
+    ? sermons.filter(
+        (s) =>
+          s.title?.toLowerCase().includes(search.toLowerCase()) ||
+          s.preacher?.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
 
   // ➕ CREATE / UPDATE
   const handleSubmit = async () => {
@@ -71,15 +98,31 @@ export default function SermonsPage() {
       return alert("Jaza taarifa zote");
     }
 
+    const embedUrl = getEmbedUrl(videourl);
+
+    if (!embedUrl) {
+      return alert("Weka link sahihi ya YouTube");
+    }
+
     if (editItem) {
       await fetch(`/api/sermons/${editItem.id}`, {
         method: "PUT",
-        body: JSON.stringify({ title, preacher, videourl }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          preacher,
+          videourl: embedUrl,
+        }),
       });
     } else {
       await fetch("/api/sermons", {
         method: "POST",
-        body: JSON.stringify({ title, preacher, videourl }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          preacher,
+          videourl: embedUrl,
+        }),
       });
     }
 
@@ -118,30 +161,16 @@ export default function SermonsPage() {
   return (
     <div className="bg-gray-50 min-h-screen">
 
-      {/* 🎨 HERO */}
-      <div
-        className="relative text-white py-24 px-6 text-center bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1490730141103-6cac27aaab94')",
-        }}
-      >
-        <div className="absolute inset-0 bg-black opacity-60"></div>
-
-        <div className="relative max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">
-            Mahubiri ya Neno
-          </h1>
-          <p className="opacity-90">
-            Sikiliza na jifunze kupitia mafundisho
-          </p>
-        </div>
+      {/* HERO */}
+      <div className="relative text-white py-24 text-center bg-black">
+        <h1 className="text-4xl font-bold">Mahubiri ya Neno</h1>
+        <p className="opacity-80">Sikiliza na ujifunze</p>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-12">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between mb-6">
           <input
             type="text"
             placeholder="Tafuta..."
@@ -155,7 +184,7 @@ export default function SermonsPage() {
               onClick={() => setShowForm(true)}
               className="bg-green-600 text-white px-4 py-2 rounded-lg"
             >
-              + Ongeza Mahubiri
+              + Ongeza
             </button>
           )}
         </div>
@@ -164,45 +193,42 @@ export default function SermonsPage() {
         {loading ? (
           <p>Inapakia...</p>
         ) : filteredSermons.length === 0 ? (
-          <p className="text-gray-500">
-            Hakuna mahubiri yaliyopatikana
-          </p>
+          <p>Hakuna data</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredSermons.map((s) => (
               <div
                 key={s.id}
-                className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition"
+                className="bg-white rounded-xl shadow hover:shadow-lg transition"
               >
-                <h3 className="font-bold text-blue-600">
-                  {s.title}
-                </h3>
-
-                <p className="text-gray-600">{s.preacher}</p>
-
                 <iframe
                   src={s.videourl}
-                  className="w-full h-52 rounded mt-3"
+                  className="w-full h-52 rounded-t-xl"
                   allowFullScreen
                 />
 
-                {isAdmin && (
-                  <div className="flex gap-3 mt-4">
-                    <button
-                      onClick={() => handleEdit(s)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded"
-                    >
-                      Edit
-                    </button>
+                <div className="p-4">
+                  <h3 className="font-bold text-blue-600">{s.title}</h3>
+                  <p className="text-gray-600">{s.preacher}</p>
 
-                    <button
-                      onClick={() => handleDelete(s.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
+                  {isAdmin && (
+                    <div className="flex gap-3 mt-4">
+                      <button
+                        onClick={() => handleEdit(s)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(s.id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -211,11 +237,11 @@ export default function SermonsPage() {
 
       {/* MODAL */}
       {showForm && isAdmin && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4">
 
             <h2 className="text-xl font-bold">
-              {editItem ? "Edit Mahubiri" : "Ongeza Mahubiri"}
+              {editItem ? "Edit" : "Ongeza"}
             </h2>
 
             <input
@@ -234,7 +260,7 @@ export default function SermonsPage() {
 
             <input
               className="w-full border p-2 rounded"
-              placeholder="YouTube Embed URL"
+              placeholder="Bandika YouTube link"
               value={videourl}
               onChange={(e) => setVideourl(e.target.value)}
             />
@@ -244,7 +270,7 @@ export default function SermonsPage() {
                 onClick={handleSubmit}
                 className="bg-green-600 text-white px-4 py-2 rounded w-full"
               >
-                {editItem ? "Update" : "Save"}
+                Save
               </button>
 
               <button

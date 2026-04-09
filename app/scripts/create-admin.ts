@@ -1,27 +1,27 @@
-
-import { PrismaClient } from "@prisma/client";
+// scripts/create-admin.ts
+import { supabase } from "../lib/supabaseClient";
 import bcrypt from "bcrypt";
-
-const prisma = new PrismaClient();
 
 async function main() {
   const password = await bcrypt.hash("admin123", 10);
+  const email = "admin@church.com";
 
-  await prisma.user.create({
-    data: {
-      email: "admin@church.com",
-      password,
-      role: "ADMIN",
-    },
-  });
+  // Insert into your Supabase "profiles" table
+  const { data, error } = await supabase
+    .from("profiles") // adjust table name if different
+    .insert([
+      {
+        email,
+        password, // store hashed password
+        role: "ADMIN",
+      },
+    ]);
 
-  console.log("Admin created!");
+  if (error) {
+    console.error("Failed to create admin:", error);
+  } else {
+    console.log("Admin created:", data);
+  }
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main();
