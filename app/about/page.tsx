@@ -103,10 +103,10 @@ export default function AboutPage() {
 
   <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
     {[
-      { name: "Mchungaji", role: "Kiongozi Mkuu", img: "/images/pastor.jpg" },
-      { name: "Wazee", role: "Uongozi", img: "/images/elders.jpg" },
-      { name: "Katibu", role: "Ofisi", img: "/images/secretary.jpg" },
-      { name: "Vijana", role: "Mwenyekiti", img: "/images/youth.jpg" }
+      { name: "Mchungaji", role: "Kiongozi Mkuu", img: "/images/clear.jpg" },
+      { name: "Wazee", role: "Uongozi", img: "/images/blue.jpg" },
+      { name: "Katibu", role: "Ofisi", img: "/images/fresh.jpg" },
+      { name: "Vijana", role: "Mwenyekiti", img: "/images/golden.jpg" }
     ].map((l, i) => (
       <div key={i} className="bg-slate-50 rounded-xl overflow-hidden shadow">
 
@@ -182,11 +182,11 @@ export default function AboutPage() {
 
   <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
     {[
-      { name: "Vijana", img: "/images/youth.jpg" },
-      { name: "Watoto", img: "/images/children.jpg" },
-      { name: "IT", img: "/images/it.jpg" },
-      { name: "Wanawake", img: "/images/harvest.jpg" },
-      { name: "Wanaume", img: "/images/men.jpg" }
+      { name: "Vijana", img: "/images/golden.jpg" },
+      { name: "Watoto", img: "/images/harvest.jpg" },
+      { name: "IT", img: "/images/vintage.jpg" },
+      { name: "Wanawake", img: "/images/blue.jpg" },
+      { name: "Wanaume", img: "/images/clear.jpg" }
     ].map((d, i) => (
       <div 
         key={i} 

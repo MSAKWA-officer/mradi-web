@@ -12,13 +12,21 @@ type Announcement = {
   created_at: string;
 };
 
+type Message = {
+  id: string;
+  sender_email: string;
+  message: string;
+  created_at: string;
+};
+
 export default function AdminPage() {
   const router = useRouter();
 
-  const [role, setRole] = useState<string | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -27,62 +35,57 @@ export default function AdminPage() {
   // 🔐 CHECK ADMIN
   useEffect(() => {
     const checkAdmin = async () => {
-      try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
 
-        if (userError || !user) {
-          router.push("/login");
-          return;
-        }
-
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        if (profileError || profile?.role !== "admin") {
-          router.push("/");
-          return;
-        }
-
-        setRole("admin");
-        setCheckingAuth(false);
-        fetchData();
-      } catch (err) {
+      if (!user) {
         router.push("/login");
+        return;
       }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profile?.role !== "admin") {
+        router.push("/");
+        return;
+      }
+
+      setCheckingAuth(false);
+      fetchAnnouncements();
+      fetchMessages();
     };
 
     checkAdmin();
   }, [router]);
 
-  // 📥 FETCH DATA
-  const fetchData = async () => {
-    const { data, error } = await supabase
+  // 📥 FETCH ANNOUNCEMENTS
+  const fetchAnnouncements = async () => {
+    const { data } = await supabase
       .from("announcements")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error) {
-      setAnnouncements(data || []);
-    }
+    setAnnouncements(data || []);
+  };
+
+  // 📥 FETCH MESSAGES (API)
+  const fetchMessages = async () => {
+    const res = await fetch("/api/messages");
+    const data = await res.json();
+    setMessages(data || []);
   };
 
   // 📤 UPLOAD FILE
   const uploadFile = async () => {
     if (!file) return null;
-    const fileExt = file.name.split('.').pop();
+
+    const fileExt = file.name.split(".").pop();
     const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
 
-    const { error } = await supabase.storage
-      .from("announcements")
-      .upload(fileName, file);
-
-    if (error) {
-      alert("Imeshindwa kupakia picha: " + error.message);
-      return null;
-    }
+    await supabase.storage.from("announcements").upload(fileName, file);
 
     const { data } = supabase.storage
       .from("announcements")
@@ -94,125 +97,127 @@ export default function AdminPage() {
   // ➕ ADD ANNOUNCEMENT
   const addAnnouncement = async () => {
     if (!title || !message) {
-      alert("Tafadhali jaza kichwa cha habari na ujumbe.");
+      alert("Jaza taarifa zote");
       return;
     }
+
     setLoading(true);
-    try {
-      const imageUrl = await uploadFile();
-      const { error } = await supabase.from("announcements").insert([
-        { title, message, image_url: imageUrl }
-      ]);
 
-      if (error) throw error;
+    const imageUrl = await uploadFile();
 
-      alert("Tangazo limeongezwa!");
-      setTitle("");
-      setMessage("");
-      setFile(null);
-      fetchData();
-    } catch (error: any) {
-      alert("Imeshindwa kuhifadhi: " + error.message);
-    } finally {
-      setLoading(false);
-    }
+    await supabase.from("announcements").insert([
+      { title, message, image_url: imageUrl },
+    ]);
+
+    setTitle("");
+    setMessage("");
+    setFile(null);
+
+    fetchAnnouncements();
+    setLoading(false);
   };
 
   // 🗑 DELETE ANNOUNCEMENT
   const deleteAnnouncement = async (id: string) => {
-    if (!confirm("Je, una uhakika unataka kufuta tangazo hili?")) return;
-    const { error } = await supabase.from("announcements").delete().eq("id", id);
-    if (!error) fetchData();
+    await supabase.from("announcements").delete().eq("id", id);
+    fetchAnnouncements();
+  };
+
+  // 🗑 DELETE MESSAGE
+  const deleteMessage = async (id: string) => {
+    await fetch(`/api/messages/${id}`, {
+      method: "DELETE",
+    });
+    fetchMessages();
   };
 
   if (checkingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-xl font-semibold animate-pulse text-gray-600">
-          Inathibitisha ruhusa ya Admin...
-        </p>
-      </div>
-    );
+    return <p className="text-center mt-10">Loading...</p>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-6 text-black">
-      {/* HEADER (Kitufe cha Logout kimeondolewa hapa) */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm">
-        <h1 className="text-2xl font-bold text-green-700">👑 Admin Dashboard</h1>
-        <span className="text-sm text-gray-500 font-medium">Umeingia kama Admin</span>
-      </div>
+    <div className="p-6 space-y-8 text-black">
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <h1 className="text-2xl font-bold text-green-700">
+        👑 Admin Dashboard
+      </h1>
+
+      {/* ================= ANNOUNCEMENTS ================= */}
+      <div className="grid lg:grid-cols-3 gap-6">
+
         {/* FORM */}
-        <div className="lg:col-span-1 bg-white p-6 rounded-2xl shadow-md space-y-4 h-fit">
-          <h2 className="text-xl font-semibold text-gray-700 border-b pb-2">Ongeza Tangazo</h2>
-          <div className="space-y-3">
-            <input
-              className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-400"
-              placeholder="Kichwa cha Habari"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <textarea
-              className="w-full border p-2 rounded-lg h-32 outline-none focus:ring-2 focus:ring-green-400"
-              placeholder="Andika ujumbe hapa..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <input
-              type="file"
-              accept="image/*"
-              className="w-full text-sm text-gray-500"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-            />
-            <button
-              onClick={addAnnouncement}
-              disabled={loading}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg w-full font-bold transition disabled:bg-gray-400"
-            >
-              {loading ? "Inahifadhi..." : "TUMA TANGAZO"}
-            </button>
-          </div>
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="font-bold mb-3">Ongeza Tangazo</h2>
+
+          <input
+            className="w-full border p-2 mb-2"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <textarea
+            className="w-full border p-2 mb-2"
+            placeholder="Message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+
+          <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+
+          <button
+            onClick={addAnnouncement}
+            className="bg-green-600 text-white px-3 py-2 mt-2 w-full"
+          >
+            {loading ? "Saving..." : "Add"}
+          </button>
         </div>
 
         {/* LIST */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-md">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Matangazo Yaliyopo</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-gray-100 text-gray-600 text-xs uppercase">
-                  <th className="p-3">Picha</th>
-                  <th className="p-3">Habari</th>
-                  <th className="p-3 text-center">Kitendo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {announcements.map((a) => (
-                  <tr key={a.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3">
-                      <img src={a.image_url || "/no-image.png"} className="h-12 w-12 object-cover rounded-md" />
-                    </td>
-                    <td className="p-3">
-                      <p className="font-bold">{a.title}</p>
-                      <p className="text-xs text-gray-500 line-clamp-1">{a.message}</p>
-                    </td>
-                    <td className="p-3 text-center">
-                      <button 
-                        onClick={() => deleteAnnouncement(a.id)}
-                        className="text-red-500 hover:underline text-sm"
-                      >
-                        Futa
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="lg:col-span-2 bg-white p-4 rounded shadow">
+          <h2 className="font-bold mb-3">Matangazo</h2>
+
+          {announcements.map((a) => (
+            <div key={a.id} className="border p-3 mb-2">
+              <p className="font-bold">{a.title}</p>
+              <p>{a.message}</p>
+
+              <button
+                onClick={() => deleteAnnouncement(a.id)}
+                className="text-red-500 text-sm"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* ================= MESSAGES ================= */}
+      <div className="bg-white p-6 rounded shadow">
+        <h2 className="text-xl font-bold mb-4 text-blue-700">
+          📩 Messages kutoka Users
+        </h2>
+
+        {messages.length === 0 ? (
+          <p>Hakuna messages bado</p>
+        ) : (
+          messages.map((m) => (
+            <div key={m.id} className="border p-4 mb-3 rounded">
+              <p className="font-semibold">{m.sender_email}</p>
+              <p className="text-gray-700">{m.message}</p>
+
+              <button
+                onClick={() => deleteMessage(m.id)}
+                className="mt-2 text-red-500 text-sm"
+              >
+                Delete
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
     </div>
   );
 }

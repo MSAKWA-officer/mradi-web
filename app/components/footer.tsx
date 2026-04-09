@@ -5,13 +5,8 @@ export default function Footer() {
     <footer className="bg-green-900 text-white mt-16">
       <div className="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-3 gap-8 border-b border-green-700">
 
-        {/* LOGO & DESCRIPTION */}
+        {/* DESCRIPTION */}
         <div className="flex flex-col items-center md:items-start">
-          <img
-            src="/logo.jpg"
-            alt="Kanisa Letu Logo"
-            className="h-12 w-12 mb-2 rounded-full"
-          />
           <span className="text-xl font-bold uppercase text-white">
             Kanisa Letu
           </span>
