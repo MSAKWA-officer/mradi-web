@@ -1,170 +1,177 @@
-import Link from "next/link";
+"use client"; // Muhimu kwa Next.js App Router
+
+import React from 'react';
+import Image from 'next/image';
 import { 
-  PlayCircle, ArrowUpRight, 
-  Radio, MapPin, Calendar, Heart
+  PlayCircle, 
+  Radio, 
+  MapPin, 
+  Heart, 
+  Users, 
+  Church, 
+  Music, 
+  Mic2, 
+  Music4, 
+  CalendarCheck 
 } from "lucide-react";
 
 export default function HomePage() {
   return (
     <div className="bg-[#FAFAFA] font-sans selection:bg-amber-200 selection:text-slate-900">
 
-      {/* HERO */}
-      <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
+      {/* HERO SECTION */}
+      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="/images/churchimage.jpg" 
+            alt="Church Background" 
+            fill
+            priority
+            sizes="100vw" // Inachukua upana wote wa kioo
+            className="object-cover brightness-[0.4]"
+          />
+        </div>
 
-        <div 
-          className="absolute inset-0 bg-cover bg-center scale-105"
-          style={{ backgroundImage: `url('/images/churchimage.jpg')` }}
-        />
-
-        <div className="absolute inset-0 bg-black/50 backdrop-brightness-75" />
-
-        <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
-
-          <span className="text-amber-400 text-[10px] uppercase tracking-[0.3em] font-semibold">
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+          <span className="text-amber-400 text-[10px] md:text-xs uppercase tracking-[0.4em] font-bold block mb-4">
             FPCT Yeriko Temple • Mbeya
           </span>
 
-          <h1 className="mt-4 text-4xl md:text-6xl font-extrabold text-white leading-tight">
+          <h1 className="text-4xl md:text-7xl font-black text-white tracking-tight leading-none">
             Wito wa <br />
-            <span className="text-amber-400 italic font-serif">
-              Mbinguni
-            </span>
+            <span className="text-amber-400 italic font-serif">Mbinguni</span>
           </h1>
 
-          <p className="mt-4 text-white/90 text-sm md:text-base leading-relaxed">
-            Kuwafikia wasiofikiwa kwa Injili ya Yesu Kristo,
-            na kuwawezesha waamini kutembea katika kusudi lao la Mungu.
-          </p>
+          <div className="mt-10 flex justify-center gap-5 flex-wrap">
+           
 
-          <div className="mt-8 flex justify-center gap-4 flex-wrap">
-            <Link 
-              href="/sermons"
-              className="flex items-center gap-2 bg-amber-500 text-black px-6 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-amber-400 transition rounded-full"
+           <a 
+              href="https://www.youtube.com/@Yeriko_Temple_Ikuti_TV/streams" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block"
             >
-              Sikiliza Mahubiri <PlayCircle size={16}/>
-            </Link>
+              <button className="flex items-center gap-3 text-white border-2 border-white/50 backdrop-blur-sm px-8 py-4 text-xs uppercase font-bold hover:bg-white hover:text-black transition-all duration-300 rounded-full active:scale-95">
+                <Radio size={16}/> Mubashara
+              </button>
+            </a>
 
-            <button className="flex items-center gap-2 text-white border border-white px-6 py-3 text-xs uppercase font-semibold hover:bg-white hover:text-black transition rounded-full">
-              <Radio size={14}/> Mubashara
-            </button>
           </div>
         </div>
       </section>
 
       {/* MISSION & VISION */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-
-          <div className="relative">
-            <div className="aspect-[4/5] overflow-hidden shadow-lg">
-              <img 
-                src="/images/churchimagee.jpg" 
-                alt="Jamii ya Kanisa"
-                className="w-full h-full object-cover"
-              />
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="relative group">
+              <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-slate-50 shadow-md">
+                <Image 
+                  src="/images/churchimagee.jpg" 
+                  alt="Jamii ya Kanisa"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw" // Kwenye simu 100%, kwenye PC nusu kioo
+                  className="object-cover transition-all duration-1000 group-hover:scale-105"
+                />
+              </div>
             </div>
 
-            <div className="absolute -bottom-6 -right-6 bg-amber-500 p-6 shadow-lg hidden md:block">
-              <Heart size={24} className="text-black mb-2" />
-              <p className="text-black font-bold text-sm">
-                Tumeanzishwa kwa Imani
-              </p>
+            <div className="space-y-8">
+              <div>
+                <span className="text-amber-600 text-[10px] font-black uppercase tracking-[0.4em] block mb-2">Dhamira</span>
+                <h2 className="text-2xl md:text-4xl font-black text-slate-950 tracking-tighter mb-3 leading-tight uppercase">
+                   Kuwafikia wengi kwa Injili
+                </h2>
+                <p className="text-slate-700 text-sm leading-relaxed font-semibold">
+                  Kuwafikia wasiofikiwa kwa Injili ya Yesu Kristo na kuwawezesha waamini kutembea katika kusudi la Kimungu.
+                </p>
+              </div>
+              <div className="h-[2px] w-16 bg-slate-900" />
+              <div>
+                <span className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] block mb-2">Maono</span>
+                <h2 className="text-2xl md:text-4xl font-black text-slate-950 tracking-tighter mb-3 leading-tight uppercase">
+                  Kuwa taa ya Matumaini
+                </h2>
+                <p className="text-slate-700 text-sm leading-relaxed font-semibold">
+                  Kuwa kitovu cha mabadiliko ya kiroho na kijamii, tukileta nuru ya tumaini kwa kila mmoja.
+                </p>
+              </div>
             </div>
-          </div>
-
-          <div className="space-y-12">
-
-            <div>
-              <span className="text-amber-600 text-[10px] font-semibold uppercase tracking-[0.3em] flex items-center gap-2 mb-3">
-                <div className="h-[2px] w-6 bg-amber-600" />
-                Dhamira
-              </span>
-
-              <h2 className="text-3xl md:text-4xl font-extrabold text-black mb-3">
-                <span className="italic text-amber-600">Dhamira</span>
-              </h2>
-
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Kuwafikia wasiofikiwa kwa Injili ya Yesu Kristo,
-                na kuwawezesha waamini kutembea katika kusudi lao la Mungu.
-              </p>
-            </div>
-
-            <div>
-              <span className="text-slate-500 text-[10px] font-semibold uppercase tracking-[0.3em] flex items-center gap-2 mb-3">
-                <div className="h-[2px] w-6 bg-slate-400" />
-                Maono
-              </span>
-
-              <h2 className="text-3xl md:text-4xl font-extrabold text-black mb-3">
-                <span className="italic text-slate-500">Maono</span>
-              </h2>
-
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Kuwa taa ya matumaini na mabadiliko kwa jamii.
-              </p>
-            </div>
-
           </div>
         </div>
       </section>
 
-      {/* SERVICE TIMES */}
-      <section className="relative z-10 -mt-16 pb-20 px-4 bg-gradient-to-br from-amber-50 via-white to-amber-100">
-        <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden grid md:grid-cols-3">
+   {/* RATIBA SECTION */}
+<section className="relative z-10 pt-25 pb-15 px-4"> 
+  {/* pt-32 inaongeza nafasi kubwa juu kuitenganisha na sehemu iliyopita */}
+  
+  <div className="max-w-7xl mx-auto bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)]  overflow-hidden border border-amber-100">
+    
+    {/* Header ya Ratiba - Rangi Nyeusi Imeondolewa hapa */}
+    <div className="bg-amber-500 py-8 text-center border-b border-amber-600/10">
+      <h2 className="text-white font-black uppercase tracking-[0.3em] text-base md:text-lg">
+        Ratiba ya Huduma za Wiki
+      </h2>
+      <div className="w-20 h-1 bg-white/40 mx-auto mt-2 rounded-full"></div>
+    </div>
 
-          <div className="p-6 text-center border-b md:border-b-0 md:border-r border-slate-200">
-            <Calendar className="text-amber-500 mx-auto mb-3" size={24} />
-            <h3 className="text-xs font-semibold text-slate-700 uppercase mb-2">
-              Jumapili
-            </h3>
-            <p className="text-lg font-bold text-slate-900">
-              08:00 — 11:30
-            </p>
+    {/* Grid ya Siku */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
+      {[
+        { day: 'Jumatatu', activity: 'Vijana', icon: Users },
+        { day: 'Jumanne', activity: 'Wamama', icon: Heart },
+        { day: 'Jumatano', activity: 'Kanisa Zima', icon: Church },
+        { day: 'Alhamisi', activity: 'Kwaya', icon: Music },
+        { day: 'Ijumaa', activity: 'Maombi', icon: Mic2 },
+        { day: 'Jumamosi', activity: 'Praise Team', icon: Music4 },
+      ].map((item) => (
+        <div 
+          key={item.day} 
+          className="p-10 text-center border-r border-b border-slate-50 hover:bg-amber-50/50 transition-all duration-300 group"
+        >
+          <div className="bg-amber-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 group-hover:bg-amber-100 transition-colors">
+            <item.icon className="text-amber-600 group-hover:scale-110 transition-transform" size={32} />
           </div>
-
-          <div className="p-6 text-center border-b md:border-b-0 md:border-r border-slate-200">
-            <Radio className="text-amber-500 mx-auto mb-3" size={24} />
-            <h3 className="text-xs font-semibold text-slate-700 uppercase mb-2">
-              Maombi
-            </h3>
-            <p className="text-lg font-bold text-slate-900">
-              05:00 — 06:30
-            </p>
+          
+          <h3 className="text-[13px] font-bold text-amber-600/70 uppercase tracking-widest">{item.day}</h3>
+          <p className="text-lg font-black text-slate-800 mt-2">{item.activity}</p>
+          
+          <div className="mt-4">
+             <p className="text-[13px] font-bold text-slate-500 bg-slate-100 inline-block px-4 py-1 rounded-full">
+              16:00 - 18:00
+             </p>
           </div>
-
-          <div className="p-6 text-center flex flex-col">
-            <MapPin className="text-amber-500 mx-auto mb-3" size={24} />
-            <h3 className="text-xs font-semibold text-slate-700 uppercase mb-2">
-              Mahali
-            </h3>
-
-            <p className="text-sm font-bold text-slate-900 mb-3">
-              Yeriko Temple, Mbeya
-            </p>
-
-            <div className="w-full h-32 rounded overflow-hidden mb-3 border">
-              <iframe
-                title="Ramani"
-                src="https://www.google.com/maps?q=Yeriko+Temple+Mbeya&output=embed"
-                width="100%"
-                height="100%"
-                loading="lazy"
-                className="border-0"
-              ></iframe>
-            </div>
-
-            <a
-              href="https://www.google.com/maps/dir/?api=1&destination=Yeriko+Temple+Mbeya"
-              target="_blank"
-              className="text-amber-600 text-xs font-semibold"
-            >
-              Mwelekeo →
-            </a>
-          </div>
-
         </div>
-      </section>
+      ))}
+
+      {/* Sehemu ya Jumapili - Muonekano wa Kipekee (Amber Deep) */}
+      <div className="p-10 text-center bg-amber-600 text-white flex flex-col justify-center items-center col-span-1 sm:col-span-2 md:col-span-1 shadow-inner">
+        <div className="bg-white/20 p-3 rounded-full mb-4">
+          <CalendarCheck size={36} />
+        </div>
+        <h3 className="text-sm font-black uppercase tracking-[0.2em]">Jumapili</h3>
+        
+        <div className="mt-6 space-y-4 w-full text-center">
+          <div className="bg-white/10 py-2 rounded-xl border border-white/10">
+            <p className="text-[11px] opacity-90 font-bold uppercase">Ibada ya Kwanza</p>
+            <p className="text-base font-black">08:00 - 10:00</p>
+          </div>
+          
+          <div className="bg-white/10 py-2 rounded-xl border border-white/10">
+            <p className="text-[11px] opacity-90 font-bold uppercase">Ibada Kuu</p>
+            <p className="text-base font-black">10:00 - 14:00</p>
+          </div>
+          
+          <div className="bg-white/10 py-2 rounded-xl border border-white/10">
+            <p className="text-[11px] opacity-90 font-bold uppercase">Ibada ya Jioni</p>
+            <p className="text-base font-black">16:00 - 18:00</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 
     </div>
   );

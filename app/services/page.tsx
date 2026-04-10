@@ -108,7 +108,7 @@ export default function IbadaPage() {
     </div>
 
     <a
-      href="https://youtube.com"
+      href="https://www.youtube.com/@Yeriko_Temple_Ikuti_TV"
       target="_blank"
       className="text-xs bg-red-500 text-white px-3 py-1.5 rounded-full hover:bg-red-600 transition"
     >
